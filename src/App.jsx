@@ -1,122 +1,60 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import Header from './components/Header';
+import Hero from './components/Hero';
+import BookCard from './components/BookCard';
+import Events from './components/Events';
+import Footer from './components/Footer';
+import { books } from './data/books';
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [filter, setFilter] = useState('all');
+
+  const filteredBooks = filter === 'all'
+    ? books
+    : books.filter((book) => book.category === filter);
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div id="top" className="min-h-screen bg-background text-customText font-serif overflow-x-hidden">
+      <Header />
+      <main>
+        <Hero />
 
-      <div className="ticks"></div>
+        {/* Catalog Section with useState Filter */}
+        <section className="py-14">
+          <div className="max-w-[1200px] mx-auto px-5">
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+              <h2 className="text-[clamp(1.6rem,4vw,2.2rem)] font-bold m-0">Curated Books</h2>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+              {/* Filter Buttons */}
+              <div className="flex flex-wrap gap-2">
+                {['all', 'fiction', 'nonfiction', 'staff-picks'].map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setFilter(cat)}
+                    className={`px-4 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors ${
+                      filter === cat
+                        ? 'bg-accent text-surface'
+                        : 'bg-surface border border-customBorder text-textLight hover:text-accent'
+                    }`}
+                  >
+                    {cat === 'staff-picks' ? 'Staff Picks' : cat}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+            {/* Product Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredBooks.map((book) => (
+                <BookCard key={book.id} book={book} />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <Events />
+      </main>
+      <Footer />
+    </div>
+  );
 }
-
-export default App
