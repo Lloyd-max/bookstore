@@ -23,7 +23,7 @@ export default function App() {
         <section className="py-14">
           <div className="max-w-[1200px] mx-auto px-5">
             <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-              <h2 className="text-[clamp(1.6rem,4vw,2.2rem)] font-bold m-0">Curated Books</h2>
+              <h2 className="text-[clamp(1.6rem,4vw,2.2rem)] font-bold m-0 text-customText">Curated Books</h2>
 
               {/* Filter Buttons */}
               <div className="flex flex-wrap gap-2">

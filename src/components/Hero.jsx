@@ -2,7 +2,7 @@ export default function Hero() {
   return (
     <section className="py-[4.5rem] bg-surface border-b border-customBorder">
       <div className="max-w-[1200px] mx-auto px-5">
-        <h1 className="text-[clamp(2rem,6vw,3.5rem)] font-bold leading-[1.2] mb-3 max-w-[18ch]">
+        <h1 className="text-[clamp(2rem,6vw,3.5rem)] font-bold leading-[1.2] mb-3 max-w-[18ch] text-customText">
           Good books, chosen by people who read them
         </h1>
         <p className="text-[1.1rem] text-textLight max-w-[55ch] mb-6">
