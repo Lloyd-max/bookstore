@@ -6,7 +6,7 @@ export const books = [
     author: 'Ana Mirelles',
     price: 'R289',
     category: 'fiction',
-    image: '/media/quiet-harbour.svg',
+    image: 'media/quite-harbour.jpg',
     alt: 'Cover of The Quiet Harbour',
   },
   {
@@ -15,7 +15,7 @@ export const books = [
     author: 'Tomas Verhoef',
     price: 'R265',
     category: 'fiction',
-    image: '/media/salt-and-ash.svg',
+    image: 'media/salt-and-ash.jpg',
     alt: 'Cover of Salt and Ash',
   },
   {
@@ -24,7 +24,7 @@ export const books = [
     author: 'Lerato Dlamini',
     price: 'R310',
     category: 'fiction',
-    image: '/media/midnight-orchard.svg',
+    image: 'media/midnight-orchard.jpg',
     alt: 'Cover of Midnight Orchard',
   },
 
@@ -35,7 +35,7 @@ export const books = [
     author: 'Hannah Pretorius',
     price: 'R330',
     category: 'nonfiction',
-    image: '/media/small-rivers.svg',
+    image: 'media/small-rivers.jpg',
     alt: 'Cover of Small Rivers',
   },
   {
@@ -44,7 +44,7 @@ export const books = [
     author: 'Kabelo Mokoena',
     price: 'R299',
     category: 'nonfiction',
-    image: '/media/the-slow-city.svg',
+    image: 'media/slow-city.jpg',
     alt: 'Cover of The Slow City',
   },
   {
@@ -53,7 +53,7 @@ export const books = [
     author: 'Ruth Ellery',
     price: 'R275',
     category: 'nonfiction',
-    image: '/media/field-notes.svg',
+    image: 'media/field-notes.jpg',
     alt: 'Cover of Field Notes',
   },
 
@@ -65,7 +65,7 @@ export const books = [
     price: 'R320',
     category: 'staff-picks',
     badge: 'Picked by Nomsa',
-    image: '/media/lantern-year.svg',
+    image: 'media/lantern-year.jpg',
     alt: 'Cover of The Lantern Year',
   },
   {
@@ -75,7 +75,7 @@ export const books = [
     price: 'R285',
     category: 'staff-picks',
     badge: 'Picked by Dev',
-    image: '/media/paper-maps.svg',
+    image: 'media/paper-images.jpg',
     alt: 'Cover of Paper Maps',
   },
   {
@@ -85,7 +85,7 @@ export const books = [
     price: 'R299',
     category: 'staff-picks',
     badge: 'Picked by Sam',
-    image: '/media/last-ferry.svg',
+    image: 'media/last-ferry.jpg',
     alt: 'Cover of The Last Ferry',
   },
 ];
