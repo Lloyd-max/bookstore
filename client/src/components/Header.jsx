@@ -1,17 +1,42 @@
-export default function Header() {
+import React from 'react';
+
+export default function Header({ user, onOpenAuth, onLogout }) {
   return (
-    <header className="sticky top-0 z-10 bg-surface border-b border-customBorder">
-      <div className="max-w-[1200px] mx-auto px-5 py-3 flex flex-wrap items-center justify-between gap-y-2 gap-x-6">
-        <a href="#top" className="text-xl font-bold text-accent no-underline">Dog-Ear Books</a>
-        <nav aria-label="Main navigation">
-          <ul className="flex flex-wrap gap-x-5 gap-y-1 m-0 p-0 list-none">
-            <li><a href="#fiction" className="text-textLight hover:text-accent hover:underline">Fiction</a></li>
-            <li><a href="#nonfiction" className="text-textLight hover:text-accent hover:underline">Nonfiction</a></li>
-            <li><a href="#staff-picks" className="text-textLight hover:text-accent hover:underline">Staff picks</a></li>
-            <li><a href="#events" className="text-textLight hover:text-accent hover:underline">Events</a></li>
-            <li><a href="#visit" className="text-textLight hover:text-accent hover:underline">Visit</a></li>
-          </ul>
+    <header className="border-b border-stone-200 bg-white sticky top-0 z-40">
+      <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+        <div className="flex items-center space-x-2">
+          <span className="font-serif font-bold text-xl tracking-tight">Dog-Ear Books</span>
+        </div>
+
+        <nav className="hidden md:flex space-x-6 text-sm text-stone-600">
+          <a href="#fiction" className="hover:text-stone-900 transition">Fiction</a>
+          <a href="#nonfiction" className="hover:text-stone-900 transition">Nonfiction</a>
+          <a href="#staff-picks" className="hover:text-stone-900 transition">Staff Picks</a>
+          <a href="#events" className="hover:text-stone-900 transition">Events</a>
         </nav>
+
+        <div className="flex items-center space-x-4">
+          {user ? (
+            <div className="flex items-center space-x-3">
+              <span className="text-xs bg-stone-100 text-stone-700 px-3 py-1.5 rounded-full font-medium">
+                {user.email}
+              </span>
+              <button 
+                onClick={onLogout}
+                className="text-sm border border-stone-300 px-3 py-1.5 rounded-lg hover:bg-stone-50 transition"
+              >
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <button 
+              onClick={onOpenAuth}
+              className="bg-stone-900 text-white text-sm px-4 py-2 rounded-lg font-medium hover:bg-stone-800 transition"
+            >
+              Sign In
+            </button>
+          )}
+        </div>
       </div>
     </header>
   );

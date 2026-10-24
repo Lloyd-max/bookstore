@@ -32,15 +32,15 @@ async function seedDatabase() {
 
     // 2. Insert book data
     const booksData = [
-      ['quiet-harbour', 'The Quiet Harbour', 'Ana Mirelles', 'R289', 'fiction', null, '/media/quiet-harbour.svg', 'Cover of The Quiet Harbour'],
-      ['salt-and-ash', 'Salt and Ash', 'Tomas Verhoef', 'R265', 'fiction', null, '/media/salt-and-ash.svg', 'Cover of Salt and Ash'],
-      ['midnight-orchard', 'Midnight Orchard', 'Lerato Dlamini', 'R310', 'fiction', null, '/media/midnight-orchard.svg', 'Cover of Midnight Orchard'],
-      ['small-rivers', 'Small Rivers', 'Hannah Pretorius', 'R330', 'nonfiction', null, '/media/small-rivers.svg', 'Cover of Small Rivers'],
-      ['the-slow-city', 'The Slow City', 'Kabelo Mokoena', 'R299', 'nonfiction', null, '/media/the-slow-city.svg', 'Cover of The Slow City'],
-      ['field-notes', 'Field Notes', 'Ruth Ellery', 'R275', 'nonfiction', null, '/media/field-notes.svg', 'Cover of Field Notes'],
-      ['lantern-year', 'The Lantern Year', 'Ines Calloway', 'R320', 'staff-picks', 'Picked by Nomsa', '/media/lantern-year.svg', 'Cover of The Lantern Year'],
-      ['paper-maps', 'Paper Maps', 'Jonas Albrecht', 'R285', 'staff-picks', 'Picked by Dev', '/media/paper-maps.svg', 'Cover of Paper Maps'],
-      ['last-ferry', 'The Last Ferry', 'Mina Okafor', 'R299', 'staff-picks', 'Picked by Sam', '/media/last-ferry.svg', 'Cover of Last Ferry']
+      ['quiet-harbour', 'The Quiet Harbour', 'Ana Mirelles', 'R289', 'fiction', null, '/media/quite-harbour.jpg', 'Cover of The Quiet Harbour'],
+      ['salt-and-ash', 'Salt and Ash', 'Tomas Verhoef', 'R265', 'fiction', null, '/media/salt-and-ash.jpg', 'Cover of Salt and Ash'],
+      ['midnight-orchard', 'Midnight Orchard', 'Lerato Dlamini', 'R310', 'fiction', null, '/media/midnight-orchard.jpg', 'Cover of Midnight Orchard'],
+      ['small-rivers', 'Small Rivers', 'Hannah Pretorius', 'R330', 'nonfiction', null, '/media/small-rivers.jpg', 'Cover of Small Rivers'],
+      ['the-slow-city', 'The Slow City', 'Kabelo Mokoena', 'R299', 'nonfiction', null, '/media/slow-city.jpg', 'Cover of The Slow City'],
+      ['field-notes', 'Field Notes', 'Ruth Ellery', 'R275', 'nonfiction', null, '/media/field-notes.jpg', 'Cover of Field Notes'],
+      ['lantern-year', 'The Lantern Year', 'Ines Calloway', 'R320', 'staff-picks', 'Picked by Nomsa', '/media/lantern-year.jpg', 'Cover of The Lantern Year'],
+      ['paper-maps', 'Paper Maps', 'Jonas Albrecht', 'R285', 'staff-picks', 'Picked by Dev', '/media/paper-images.jpg', 'Cover of Paper Maps'],
+      ['last-ferry', 'The Last Ferry', 'Mina Okafor', 'R299', 'staff-picks', 'Picked by Sam', '/media/last-ferry.jpg', 'Cover of Last Ferry']
     ];
 
     for (const book of booksData) {
