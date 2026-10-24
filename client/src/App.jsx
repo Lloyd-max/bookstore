@@ -47,12 +47,12 @@ export default function App() {
         <section className="max-w-7xl mx-auto px-4 py-12">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-2xl font-serif font-bold">Catalog & Collections</h2>
-            <span className="text-sm text-stone-500">Live from PostgreSQL Database</span>
+            <span className="text-sm text-stone-500">Current Books Available</span>
           </div>
 
           {loading ? (
             <div className="text-center py-12 text-stone-500">
-              Loading books from database...
+              Loading books...
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
