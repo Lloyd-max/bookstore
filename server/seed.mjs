@@ -2,10 +2,13 @@ import { sql } from './db.mjs';
 
 async function seedDatabase() {
   try {
-    // 1. Drop and recreate tables
+    // 1. Drop tables in correct order (respecting foreign keys)
+    await sql`DROP TABLE IF EXISTS order_items;`;
+    await sql`DROP TABLE IF EXISTS orders;`;
     await sql`DROP TABLE IF EXISTS books;`;
     await sql`DROP TABLE IF EXISTS users;`;
 
+    // 2. Create tables
     await sql`
       CREATE TABLE users (
         id SERIAL PRIMARY KEY,
@@ -28,9 +31,30 @@ async function seedDatabase() {
       );
     `;
 
-    console.log("Tables created successfully.");
+    await sql`
+      CREATE TABLE orders (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        stripe_session_id VARCHAR(255) UNIQUE NOT NULL,
+        total_amount NUMERIC(10, 2) NOT NULL,
+        status VARCHAR(50) DEFAULT 'pending',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
 
-    // 2. Insert book data
+    await sql`
+      CREATE TABLE order_items (
+        id SERIAL PRIMARY KEY,
+        order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+        book_id VARCHAR(50) NOT NULL REFERENCES books(id) ON DELETE CASCADE,
+        quantity INTEGER NOT NULL DEFAULT 1,
+        price NUMERIC(10, 2) NOT NULL
+      );
+    `;
+
+    console.log("All tables created successfully (users, books, orders, order_items).");
+
+    // 3. Insert book data
     const booksData = [
       ['quiet-harbour', 'The Quiet Harbour', 'Ana Mirelles', 'R289', 'fiction', null, '/media/quite-harbour.jpg', 'Cover of The Quiet Harbour'],
       ['salt-and-ash', 'Salt and Ash', 'Tomas Verhoef', 'R265', 'fiction', null, '/media/salt-and-ash.jpg', 'Cover of Salt and Ash'],
