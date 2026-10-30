@@ -1,24 +1,38 @@
-import { sql } from './db.mjs';
+import dotenv from 'dotenv';
+dotenv.config();
+import pkg from 'pg';
+const { Pool } = pkg;
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
 
 async function seedDatabase() {
   try {
+    console.log("Connecting to Neon database...");
+    const client = await pool.connect();
+    console.log("Connected successfully!");
+
     // 1. Drop tables in correct order (respecting foreign keys)
-    await sql`DROP TABLE IF EXISTS order_items;`;
-    await sql`DROP TABLE IF EXISTS orders;`;
-    await sql`DROP TABLE IF EXISTS books;`;
-    await sql`DROP TABLE IF EXISTS users;`;
+    console.log("Dropping existing tables...");
+    await client.query('DROP TABLE IF EXISTS order_items;');
+    await client.query('DROP TABLE IF EXISTS orders;');
+    await client.query('DROP TABLE IF EXISTS books;');
+    await client.query('DROP TABLE IF EXISTS users;');
 
     // 2. Create tables
-    await sql`
+    console.log("Creating new schema tables...");
+    await client.query(`
       CREATE TABLE users (
         id SERIAL PRIMARY KEY,
         email VARCHAR(255) UNIQUE NOT NULL,
         password_hash VARCHAR(255) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
-    `;
+    `);
 
-    await sql`
+    await client.query(`
       CREATE TABLE books (
         id VARCHAR(50) PRIMARY KEY,
         title VARCHAR(255) NOT NULL,
@@ -29,9 +43,9 @@ async function seedDatabase() {
         image VARCHAR(255) NOT NULL,
         alt VARCHAR(255) NOT NULL
       );
-    `;
+    `);
 
-    await sql`
+    await client.query(`
       CREATE TABLE orders (
         id SERIAL PRIMARY KEY,
         user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -40,9 +54,9 @@ async function seedDatabase() {
         status VARCHAR(50) DEFAULT 'pending',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
-    `;
+    `);
 
-    await sql`
+    await client.query(`
       CREATE TABLE order_items (
         id SERIAL PRIMARY KEY,
         order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
@@ -50,7 +64,7 @@ async function seedDatabase() {
         quantity INTEGER NOT NULL DEFAULT 1,
         price NUMERIC(10, 2) NOT NULL
       );
-    `;
+    `);
 
     console.log("All tables created successfully (users, books, orders, order_items).");
 
@@ -68,13 +82,16 @@ async function seedDatabase() {
     ];
 
     for (const book of booksData) {
-      await sql`
-        INSERT INTO books (id, title, author, price, category, badge, image, alt) 
-        VALUES (${book[0]}, ${book[1]}, ${book[2]}, ${book[3]}, ${book[4]}, ${book[5]}, ${book[6]}, ${book[7]})
-      `;
+      await client.query(
+        `INSERT INTO books (id, title, author, price, category, badge, image, alt) 
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        book
+      );
     }
 
     console.log("Database seeded with books successfully!");
+    client.release();
+    await pool.end();
     process.exit(0);
   } catch (err) {
     console.error("Error seeding database:", err);
