@@ -12,6 +12,9 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+// CRITICAL for Fly.io proxy recognition of secure HTTPS connections
+app.set('trust proxy', 1);
+
 // Allow local development and your production frontend URL (once deployed)
 const allowedOrigins = [
   process.env.FRONTEND_URL,
@@ -86,14 +89,16 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, 
 // JSON body parser for all other regular API routes
 app.use(express.json());
 
-// Session Configuration
+// Session Configuration (Updated for cross-domain HTTPS cookies on Vercel + Fly.io)
 app.use(session({
   secret: process.env.SESSION_SECRET || 'super-secret-key-change-me',
   resave: false,
   saveUninitialized: false,
+  proxy: true, // Trust the reverse proxy headers from Fly.io
   cookie: {
-    secure: false, // Set to true if using HTTPS in production
+    secure: true,      // Required for HTTPS cross-site in production
     httpOnly: true,
+    sameSite: 'none',  // Required so Vercel frontend can pass cookies to Fly.io backend
     maxAge: 24 * 60 * 60 * 1000 // 1 day session
   }
 }));
@@ -267,7 +272,6 @@ app.post('/api/create-checkout-session', requireAuth, async (req, res) => {
 
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
-    
       line_items: lineItemsForStripe,
       mode: 'payment',
       success_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/success?session_id={CHECKOUT_SESSION_ID}`,
@@ -305,4 +309,4 @@ app.post('/api/create-checkout-session', requireAuth, async (req, res) => {
 // Start server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
-});//
+});
