@@ -305,4 +305,4 @@ app.post('/api/create-checkout-session', requireAuth, async (req, res) => {
 // Start server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
-});
+});//
