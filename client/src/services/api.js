@@ -54,3 +54,15 @@ export async function logoutUser() {
   });
   return await response.json();
 }
+
+export async function createCheckoutSession(items) {
+  const response = await fetch(`${API_URL}/create-checkout-session`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ items }),
+    credentials: 'include' // Crucial for sending your session cookie
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || 'Failed to create checkout session');
+  return data.url; // Returns the Stripe hosted checkout URL
+}
