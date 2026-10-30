@@ -3,12 +3,14 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
 import session from 'express-session';
+import Stripe from 'stripe';
 import { sql } from './db.mjs';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Allow local development and your production frontend URL (once deployed)
 const allowedOrigins = [
@@ -31,6 +33,57 @@ app.use(cors({
   },
   credentials: true
 }));
+
+// --- STRIPE WEBHOOK ROUTE (Must be defined BEFORE express.json()) ---
+app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+  let event;
+
+  try {
+    // If webhook secret is configured, verify signature securely
+    if (endpointSecret) {
+      event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+    } else {
+      // Fallback for local testing if secret isn't set yet
+      event = JSON.parse(req.body.toString());
+    }
+  } catch (err) {
+    console.error(`⚠️ Webhook signature verification failed:`, err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  // Handle the checkout.session.completed event
+  if (event.type === 'checkout.session.completed') {
+    const sessionObj = event.data.object;
+    const sessionId = sessionObj.id;
+
+    try {
+      // Update order status to 'paid' in Neon PostgreSQL
+      const updateResult = await sql`
+        UPDATE orders 
+        SET status = 'paid' 
+        WHERE stripe_session_id = ${sessionId}
+        RETURNING id, user_id, total_amount;
+      `;
+
+      if (updateResult.length > 0) {
+        console.log(`✅ Order marked as PAID for session ID: ${sessionId}`);
+      } else {
+        console.warn(`⚠️ Order not found for Stripe session ID: ${sessionId}`);
+      }
+    } catch (err) {
+      console.error('❌ Error updating order status in database:', err);
+      return res.status(500).json({ error: 'Database update failed' });
+    }
+  }
+
+  // Acknowledge receipt of the event to Stripe
+  res.json({ received: true });
+});
+
+// JSON body parser for all other regular API routes
 app.use(express.json());
 
 // Session Configuration
@@ -154,6 +207,99 @@ app.post('/api/logout', (req, res) => {
     res.clearCookie('connect.sid');
     res.json({ message: 'Logged out successfully' });
   });
+});
+
+// --- STRIPE CHECKOUT ROUTE ---
+
+// Middleware to block unauthenticated users from checking out
+const requireAuth = (req, res, next) => {
+  if (!req.session || !req.session.userId) {
+    return res.status(401).json({ error: 'You must be signed in to checkout.' });
+  }
+  next();
+};
+
+app.post('/api/create-checkout-session', requireAuth, async (req, res) => {
+  try {
+    const { items } = req.body; // Expects [{ bookId: 'quiet-harbour', quantity: 1 }, ...]
+    
+    if (!items || items.length === 0) {
+      return res.status(400).json({ error: 'No items provided for checkout.' });
+    }
+
+    const userId = req.session.userId;
+    let totalAmount = 0;
+    const lineItemsForStripe = [];
+    const verifiedOrderItems = [];
+
+    // CRITICAL SECURITY RULE: Look up true prices from the database, never trust the browser!
+    for (const item of items) {
+      const result = await sql`SELECT * FROM books WHERE id = ${item.bookId}`;
+      if (result.length === 0) {
+        return res.status(404).json({ error: `Book not found: ${item.bookId}` });
+      }
+      const book = result[0];
+
+      // Parse price (e.g., 'R289' -> 289.00)
+      const cleanPrice = parseFloat(book.price.replace(/[^0-9.]/g, ''));
+      const quantity = item.quantity || 1;
+      totalAmount += cleanPrice * quantity;
+
+      // Stripe expects currency amounts in cents (smallest currency unit)
+      lineItemsForStripe.push({
+        price_data: {
+          currency: 'zar',
+          product_data: {
+            name: book.title,
+            description: `Author: ${book.author}`,
+          },
+          unit_amount: Math.round(cleanPrice * 100),
+        },
+        quantity: quantity,
+      });
+
+      verifiedOrderItems.push({
+        book_id: book.id,
+        quantity: quantity,
+        price: cleanPrice,
+      });
+    }
+
+    // Create Stripe Checkout Session
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: lineItemsForStripe,
+      mode: 'payment',
+      success_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/cart`,
+      metadata: {
+        userId: userId.toString(),
+      },
+    });
+
+    // Save initial order record with status 'pending' in Neon DB
+    const orderResult = await sql`
+      INSERT INTO orders (user_id, stripe_session_id, total_amount, status)
+      VALUES (${userId}, ${session.id}, ${totalAmount}, 'pending')
+      RETURNING id;
+    `;
+    const orderId = orderResult[0].id;
+
+    // Save order items linked to this order
+    for (const orderItem of verifiedOrderItems) {
+      await sql`
+        INSERT INTO order_items (order_id, book_id, quantity, price)
+        VALUES (${orderId}, ${orderItem.book_id}, ${orderItem.quantity}, ${orderItem.price})
+      `;
+    }
+
+    // Return Stripe Checkout URL to the frontend
+    res.json({ url: session.url });
+
+  } catch (err) {
+    console.error('Error creating checkout session:', err);
+    res.status(500).json({ error: 'Internal server error during checkout.' });
+  }
 });
 
 // Start server
